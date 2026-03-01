@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>貓咪抓魚模擬器</title>
+    <style>
+        body { font-family: 'Microsoft JhengHei', sans-serif; display: flex; flex-direction: column; align-items: center; background: #e0f7fa; padding-top: 50px; }
+        #river { width: 500px; height: 150px; background: #4fc3f7; border-radius: 50px; position: relative; overflow: hidden; border: 5px solid #0288d1; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        #cat { font-size: 60px; position: absolute; top: -10px; left: 220px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; }
+        .fish { font-size: 40px; position: absolute; top: 70px; right: -60px; transition: 4s linear; }
+        .catch-action { transform: translateY(60px) rotate(10deg); }
+        .score-board { font-size: 24px; margin: 20px; color: #01579b; font-weight: bold; }
+        #log { width: 400px; height: 200px; background: white; overflow-y: auto; padding: 15px; border-radius: 10px; border: 1px solid #b3e5fc; line-height: 1.6; }
+        .success { color: #d81b60; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🐱 貓咪河邊抓魚</h1>
+    <div class="score-board">目前抓到：<span id="score">0</span> 條魚</div>
+    
+    <div id="river">
+        <div id="cat">🐱</div>
+    </div>
+
+    <div id="log"><b>系統訊息：</b>遊戲開始，貓咪就位...<br></div>
+
+    <script>
+        let score = 0;
+        let fishActive = false;
+        const cat = document.getElementById('cat');
+        const log = document.getElementById('log');
+        const scoreDisplay = document.getElementById('score');
+
+        // 核心邏輯：每 5 秒抓一次
+        setInterval(() => {
+            // 抓魚動作
+            cat.classList.add('catch-action');
+            addLog("🐾 貓咪猛力一抓！");
+
+            if (fishActive) {
+                score++;
+                scoreDisplay.innerText = score;
+                addLog("<span class='success'>✨ 喵！太準了！抓到一條魚！</span>");
+                
+                // 抓到後魚立刻消失
+                const currentFish = document.querySelector('.fish');
+                if (currentFish) currentFish.remove();
+                fishActive = false;
+            } else {
+                addLog("❌ 哎呀，抓到一把空氣...");
+            }
+
+            // 0.5 秒後縮回爪子
+            setTimeout(() => cat.classList.remove('catch-action'), 500);
+        }, 5000);
+
+        // 隨機產生魚的函數
+        function spawnFish() {
+            // 隨機間隔 2 到 8 秒出現
+            const nextTime = Math.random() * 6000 + 2000;
+            
+            setTimeout(() => {
+                const fish = document.createElement('div');
+                fish.className = 'fish';
+                fish.innerText = '🐟';
+                document.getElementById('river').appendChild(fish);
+                
+                fishActive = true;
+                
+                // 魚游過去的動畫
+                setTimeout(() => { fish.style.right = '550px'; }, 50);
+
+                // 4 秒後魚游出畫面
+                setTimeout(() => {
+                    fish.remove();
+                    fishActive = false;
+                    spawnFish(); // 循環呼叫產生下一條
+                }, 4000);
+            }, nextTime);
+        }
+
+        function addLog(msg) {
+            const time = new Date().toLocaleTimeString();
+            log.innerHTML = `[${time}] ${msg}<br>` + log.innerHTML;
+        }
+
+        // 啟動魚群
+        spawnFish();
+    </script>
+</body>
+</html>
